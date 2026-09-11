@@ -30,34 +30,66 @@ Linux 主机                                Windows 虚拟机 (dockur 容器)
 
 ## 安装
 
-### NixOS
+### NixOS（推荐）
+
+#### 方式1：Flake 直接安装
+
+```bash
+# 安装到用户环境
+nix profile install github:parkes-mimir/mimir-win
+
+# 运行
+mimir-win setup
+mimir-win doctor
+mimir-win vm start
+```
+
+#### 方式2：NixOS Module 声明式配置
 
 ```nix
 # flake.nix
 {
-  inputs.mimir-win.url = "path:/path/to/mimir-win";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    mimir-win.url = "github:parkes-mimir/mimir-win";
+  };
 
-  # configuration.nix
-  modules = [
-    mimir-win.nixosModules.mimir-win
-    {
-      services."mimir-win" = {
-        enable = true;
-        rdp = {
-          user = "MyUser";
-          passwordFile = "/run/secrets/mimir-win-password";
-        };
-        vm = {
-          cpus = 8;
-          memory = "8G";
-          diskSize = "128G";
-          autoStart = true;
-        };
-        firewall = true;
-      };
-    }
-  ];
+  outputs = { self, nixpkgs, mimir-win, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        mimir-win.nixosModules.mimir-win
+        {
+          services."mimir-win" = {
+            enable = true;
+            rdp = {
+              user = "MyUser";
+              passwordFile = "/run/secrets/mimir-win-password";
+            };
+            vm = {
+              cpus = 8;
+              memory = "8G";
+              diskSize = "128G";
+              autoStart = true;
+            };
+            firewall = true;
+          };
+        }
+      ];
+    };
+  };
 }
+```
+
+#### 方式3：临时开发环境
+
+```bash
+# 进入开发环境（包含所有依赖）
+nix develop github:parkes-mimir/mimir-win
+
+# 运行
+python -m mimir_win setup
+python -m mimir_win vm start
 ```
 
 ### 非 NixOS

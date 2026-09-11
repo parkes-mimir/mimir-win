@@ -49,7 +49,7 @@
 
             meta = with pkgs.lib; {
               description = "在 Linux 桌面上无缝运行 Windows 应用";
-              homepage = "https://github.com/user/mimir-win";
+              homepage = "https://github.com/parkes-mimir/mimir-win";
               license = licenses.mit;
               platforms = [ "x86_64-linux" ];
             };
