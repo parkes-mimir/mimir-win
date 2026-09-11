@@ -2,6 +2,14 @@
 
 在 Linux 桌面上无缝运行 Windows 应用。
 
+## 法律声明
+
+- 本项目不包含 Windows 操作系统，仅提供自动化安装脚本
+- 用户需要自行确保拥有合法的 Windows 许可证
+- 本项目使用 MIT 许可证，与所有依赖兼容
+- 使用 dockur/windows 镜像时，请遵守 Microsoft 最终用户许可协议 (EULA)
+- 本项目与 Microsoft 无关联，Windows 是 Microsoft 的注册商标
+
 ## 简介
 
 Mimir-Win 是一个 Python 工具，通过容器化（Podman/Docker）运行 Windows 虚拟机，并使用 FreeRDP 的 RemoteApp 协议将 Windows 应用无缝集成到 Linux 桌面环境中。
