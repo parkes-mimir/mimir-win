@@ -1,0 +1,24 @@
+Windows Registry Editor Version 5.00
+
+; Mimir-Win RDP/RemoteApp Registry Configuration
+; Applied automatically during first boot.
+
+; --- Enable Remote Desktop ---
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server]
+"fDenyTSConnections"=dword:00000000
+
+; --- Disable NLA (required for FreeRDP) ---
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp]
+"UserAuthentication"=dword:00000000
+"SecurityLayer"=dword:00000001
+
+; --- Disable RemoteApp allowlist (allow all apps) ---
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\TSAppAllowList]
+"fDisabledAllowList"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services]
+"fAllowUnlistedRemotePrograms"=dword:00000001
+
+; --- UTC clock for containers ---
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation]
+"RealTimeIsUniversal"=dword:00000001
