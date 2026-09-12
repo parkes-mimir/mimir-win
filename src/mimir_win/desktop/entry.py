@@ -56,7 +56,6 @@ def create_app_entry(
     # Create launcher script
     launcher = BIN_DIR / f"mimir-win-{app_id}"
     # 使用当前工作目录或配置的项目路径
-    import os
     project_dir = os.environ.get("MIMIR_WIN_PROJECT_DIR", os.getcwd())
     launcher.write_text(
         f'#!/usr/bin/env bash\nexec nix develop "{project_dir}" --command python -m mimir_win app run {app_id} "$@"\n'
@@ -71,7 +70,7 @@ def create_app_entry(
         f"Exec={launcher} %F",
         "Terminal=false",
         "Type=Application",
-        f"Categories=Mimir-Win;",
+        "Categories=Mimir-Win;",
         "NoDisplay=false",
         "StartupWMClass=" + name,
         f"Icon={icon_path}",
@@ -96,7 +95,6 @@ def create_windows_entry(mimir_win_bin: str = "mimir-win") -> Path:
     """Create a .desktop entry for a full Windows desktop session."""
     _ensure_dirs()
     icon = _create_default_icon()
-    import os
     project_dir = os.environ.get("MIMIR_WIN_PROJECT_DIR", os.getcwd())
 
     desktop = DESKTOP_DIR / "mimir-win-windows.desktop"

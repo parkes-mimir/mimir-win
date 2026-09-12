@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 from mimir_win.core.config import Config, config_dir, data_dir
@@ -86,7 +85,7 @@ def run_setup(non_interactive: bool = False) -> None:
     # --- Display ---
     print("\n--- Display ---\n")
 
-    from mimir_win.core.display import detect, snap_scale
+    from mimir_win.core.display import detect
     disp = detect()
     print(f"  Detected: {disp.session_type}, {disp.desktop}, {disp.scale}x scale, {disp.monitors} monitor(s)")
 
@@ -114,10 +113,10 @@ def run_setup(non_interactive: bool = False) -> None:
     print(f"  Data dir:  {data_dir()}")
     print(f"  Backend:   {cfg.vm.backend}")
     print(f"  VM:        {cfg.vm.cpus} CPUs, {cfg.vm.memory} RAM, {cfg.vm.disk_size} disk")
-    print(f"\n  Next steps:")
-    print(f"    mimir-win doctor        Check dependencies")
-    print(f"    mimir-win vm start      Start the Windows VM")
-    print(f"    mimir-win app list      List installed apps")
+    print("\n  Next steps:")
+    print("    mimir-win doctor        Check dependencies")
+    print("    mimir-win vm start      Start the Windows VM")
+    print("    mimir-win app list      List installed apps")
 
 
 def _ask(

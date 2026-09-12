@@ -43,7 +43,7 @@ class GuestClient:
             req = urllib.request.Request(f"{self.base_url}/health")
             with urllib.request.urlopen(req, timeout=2) as resp:
                 return resp.status == 200
-        except Exception:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError):
             return False
 
     def get_apps(self) -> list[GuestApp]:
@@ -65,7 +65,7 @@ class GuestClient:
         try:
             with urllib.request.urlopen(req, timeout=10) as resp:
                 return json.loads(resp.read())
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             log.warning("Guest agent request failed: %s", e)
             return {}
 
@@ -81,6 +81,6 @@ class GuestClient:
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 return json.loads(resp.read())
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             log.warning("Guest agent POST failed: %s", e)
             return {}

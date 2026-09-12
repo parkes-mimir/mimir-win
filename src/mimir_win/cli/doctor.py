@@ -74,8 +74,10 @@ def _check_backend() -> tuple[bool, str, str]:
     return (
         False,
         "未找到 podman 或 docker",
-        "NixOS: virtualisation.podman.enable = true\n"
-        "       或: virtualisation.docker.enable = true",
+        (
+            "NixOS: virtualisation.podman.enable = true\n"
+            "       或: virtualisation.docker.enable = true"
+        ),
     )
 
 
@@ -87,10 +89,12 @@ def _check_freerdp() -> tuple[bool, str, str]:
     return (
         False,
         "未找到 FreeRDP 3+",
-        "NixOS: environment.systemPackages = [ pkgs.freerdp ];\n"
-        "       Ubuntu: sudo apt install freerdp3-x11\n"
-        "       Fedora: sudo dnf install freerdp\n"
-        "       Arch:   sudo pacman -S freerdp",
+        (
+            "NixOS: environment.systemPackages = [ pkgs.freerdp ];\n"
+            "       Ubuntu: sudo apt install freerdp3-x11\n"
+            "       Fedora: sudo dnf install freerdp\n"
+            "       Arch:   sudo pacman -S freerdp"
+        ),
     )
 
 
@@ -104,7 +108,7 @@ def _check_config() -> tuple[bool, str, str]:
             try:
                 cfg = Config.load()
                 return True, f"{p} (user={cfg.rdp.user})", ""
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 return False, f"配置无效: {e}", "检查配置文件语法"
 
     # 检查默认路径
@@ -113,14 +117,16 @@ def _check_config() -> tuple[bool, str, str]:
         try:
             cfg = Config.load()
             return True, f"{cfg_path} (user={cfg.rdp.user})", ""
-        except Exception as e:
+        except (OSError, ValueError) as e:
             return False, f"配置无效: {e}", "运行 mimir-win setup 重新配置"
 
     return (
         False,
         "未找到配置文件",
-        "运行 mimir-win setup 创建配置\n"
-        "       或在 NixOS 中设置 services.\"mimir-win\".enable = true",
+        (
+            "运行 mimir-win setup 创建配置\n"
+            '       或在 NixOS 中设置 services."mimir-win".enable = true'
+        ),
     )
 
 
@@ -151,6 +157,8 @@ def _check_compose() -> tuple[bool, str, str]:
     return (
         False,
         "未找到 compose 工具",
-        "NixOS: 确保 virtualisation.podman.enable = true\n"
-        "       或安装 docker-compose",
+        (
+            "NixOS: 确保 virtualisation.podman.enable = true\n"
+            "       或安装 docker-compose"
+        ),
     )

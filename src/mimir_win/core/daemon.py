@@ -6,10 +6,9 @@ import logging
 import signal
 import subprocess
 import threading
-import time
 
-from mimir_win.core.config import Config
 from mimir_win.core import vm
+from mimir_win.core.config import Config
 
 log = logging.getLogger(__name__)
 
@@ -112,7 +111,4 @@ def ensure_awake(cfg: Config) -> bool:
         vm.start(cfg)
         return vm.wait_for_ready(cfg, timeout=180)
 
-    if state == vm.VMState.RUNNING:
-        return True
-
-    return False
+    return state == vm.VMState.RUNNING

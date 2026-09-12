@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import logging
-import os
 import re
 import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 from mimir_win.core.config import Config
-from mimir_win.core.display import detect_session_type, snap_scale
+from mimir_win.core.display import snap_scale
 
 log = logging.getLogger(__name__)
 
@@ -124,7 +122,6 @@ def build_rdp_command(
         raise RuntimeError("FreeRDP 3+ not found. Install freerdp3 or xfreerdp.")
 
     cmd: list[str] = []
-    password = cfg.resolve_password()
 
     # Build base command
     if freerdp.kind == "flatpak":
@@ -199,7 +196,7 @@ def _parse_extra_flags(flags_str: str) -> list[str]:
             result.append(flag)
             continue
         for prefix, pattern in _SIMPLE_VALUE_FLAGS.items():
-            if flag.startswith(prefix + ":") or flag.startswith(prefix + "="):
+            if flag.startswith((prefix + ":", prefix + "=")):
                 value = flag.split(":", 1)[-1] if ":" in flag else flag.split("=", 1)[-1]
                 if pattern.match(value):
                     result.append(flag)
@@ -239,7 +236,7 @@ def launch(
             env["FREERDP_PASSWORD_FILE"] = tmp_path
             # 添加 /p: 从文件读取
             cmd_with_pass = cmd + [f"/p:file:{tmp_path}"]
-        except Exception:
+        except OSError:
             os.close(fd)
             cmd_with_pass = cmd + [f"/p:{password}"]
     else:

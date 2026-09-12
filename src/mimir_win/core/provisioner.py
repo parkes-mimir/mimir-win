@@ -61,8 +61,8 @@ def auto_install_agent(cfg: Config) -> bool:
     2. 通过 FreeRDP RemoteApp 执行 agent.ps1
     3. 等待 Agent 端口可用
     """
-    from mimir_win.core.rdp import find_freerdp
     from mimir_win.core import vm
+    from mimir_win.core.rdp import find_freerdp
 
     if not vm.is_port_open(cfg):
         log.info("VM 未就绪，跳过 agent 安装")
@@ -134,7 +134,7 @@ def auto_install_agent(cfg: Config) -> bool:
                 proc.kill()
         return False
 
-    except Exception as e:
+    except (subprocess.CalledProcessError, OSError, FileNotFoundError) as e:
         log.warning("Agent 启动失败: %s", e)
         return False
 

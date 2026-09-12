@@ -9,10 +9,9 @@ from __future__ import annotations
 
 import argparse
 import sys
-import time
 
-from mimir_win.core.config import Config, config_dir
 from mimir_win.core import vm
+from mimir_win.core.config import Config
 
 
 def handle_vm(args: argparse.Namespace) -> None:
@@ -64,7 +63,7 @@ def _cmd_start(cfg: Config) -> None:
     else:
         print(" 超时!")
         print("提示: 首次启动需要安装 Windows，可能需要 10-30 分钟", file=sys.stderr)
-        print("      可以通过 VNC 查看安装进度: http://127.0.0.1:{}".format(cfg.rdp.port + 1))
+        print(f"      可以通过 VNC 查看安装进度: http://127.0.0.1:{cfg.rdp.port + 1}")
         sys.exit(1)
 
 

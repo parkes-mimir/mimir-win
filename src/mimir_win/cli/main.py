@@ -113,7 +113,7 @@ def cli(argv: list[str] | None = None) -> None:
 
     elif args.command == "windows":
         # 快捷方式：启动完整桌面，关闭后自动刷新应用列表
-        from mimir_win.cli.app import _cmd_run, _ensure_ready, _cmd_refresh
+        from mimir_win.cli.app import _cmd_refresh, _ensure_ready
         from mimir_win.core.config import Config
         cfg = Config.load()
         _ensure_ready(cfg)
@@ -126,7 +126,7 @@ def cli(argv: list[str] | None = None) -> None:
             print("Windows 桌面已关闭，正在刷新应用列表...")
             try:
                 _cmd_refresh(cfg)
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 print(f"刷新应用列表失败: {e}")
 
     elif args.command == "vm":

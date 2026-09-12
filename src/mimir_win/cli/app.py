@@ -10,15 +10,14 @@
 
 from __future__ import annotations
 
-import re
-
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
+from mimir_win.core import rdp
 from mimir_win.core.config import Config, data_dir
-from mimir_win.core import vm, rdp
 from mimir_win.core.daemon import ensure_awake
 
 
@@ -200,7 +199,11 @@ def _apps_cache_path(cfg: Config) -> Path:
 
 def _create_desktop_entries(cfg: Config, apps: list[dict]) -> None:
     """为所有应用生成 .desktop 文件。"""
-    from mimir_win.desktop.entry import create_app_entry, create_windows_entry, create_menu_directory
+    from mimir_win.desktop.entry import (
+        create_app_entry,
+        create_menu_directory,
+        create_windows_entry,
+    )
 
     mimir_win_bin = "mimir-win"
 
@@ -238,7 +241,7 @@ def _create_desktop_entries(cfg: Config, apps: list[dict]) -> None:
     ]
 
     # UUID 正则
-    _UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.I)
+    _UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.IGNORECASE)
 
     # 每个应用
     for app in apps:
@@ -264,7 +267,7 @@ def _create_desktop_entries(cfg: Config, apps: list[dict]) -> None:
             from mimir_win.desktop.icons import save_icon
             try:
                 icon_path = str(save_icon(app_id, icon_b64))
-            except Exception:
+            except (OSError, ValueError, KeyError):
                 pass
 
         create_app_entry(

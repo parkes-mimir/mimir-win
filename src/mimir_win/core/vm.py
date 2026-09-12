@@ -12,17 +12,15 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import shutil
 import socket
 import subprocess
 import time
-from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from mimir_win.core.config import Config, config_dir, data_dir
+from mimir_win.core.config import Config, data_dir
 
 log = logging.getLogger(__name__)
 
@@ -92,7 +90,7 @@ def generate_compose(cfg: Config) -> str:
                         if part == "via" and i + 1 < len(parts):
                             val = val.replace("127.0.0.1", parts[i + 1])
                             break
-                except Exception:
+                except (subprocess.CalledProcessError, FileNotFoundError, OSError):
                     val = val.replace("127.0.0.1", "host.containers.internal")
             proxy_lines.append(f'{key}: "{val}"')
     proxy_env = "\n      ".join(proxy_lines) if proxy_lines else ""
