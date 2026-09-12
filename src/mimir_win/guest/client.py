@@ -77,21 +77,7 @@ class GuestClient:
         if self.token:
             req.add_header("Authorization", f"Bearer {self.token}")
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310 - 仅允许 http
-                return json.loads(resp.read())
-        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
-            log.warning("Guest agent POST failed: %s", e)
-            return {}
-
-    def _post(self, path: str, data: dict[str, Any] | None = None) -> Any:
-        """Make an authenticated POST request."""
-        body = json.dumps(data or {}).encode()
-        req = urllib.request.Request(f"{self.base_url}{path}", data=body, method="POST")
-        req.add_header("Content-Type", "application/json")
-        if self.token:
-            req.add_header("Authorization", f"Bearer {self.token}")
-        try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310
                 return json.loads(resp.read())
         except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             log.warning("Guest agent POST failed: %s", e)
