@@ -44,8 +44,11 @@ powershell -Command "Get-NetAdapter | Set-NetAdapterAdvancedProperty -RegistryKe
 REM --- Install guest agent (auto-start on boot) ---
 echo Installing guest agent...
 if exist "%OEM_DIR%\agent.ps1" (
-    REM 创建开机自启动 scheduled task（从 OEM 目录运行，保持同步）
-    schtasks /create /tn "MimirWinAgent" /tr "powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File \"%OEM_DIR%\agent.ps1\"" /sc onstart /rl highest /f
+    REM 创建 scheduled task（开机启动）
+    schtasks /create /tn "MimirWinAgent" /tr "powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File \"%OEM_DIR%\agent.ps1\"" /sc ONLOGON /rl HIGHEST /f
+
+    REM 添加注册表启动项（双重保障）
+    reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v MimirWinAgent /t REG_SZ /d "powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File \"%OEM_DIR%\agent.ps1\"" /f
 
     REM 立即启动 agent
     start /B powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File "%OEM_DIR%\agent.ps1"

@@ -91,7 +91,6 @@ def auto_install_agent(cfg: Config) -> bool:
     cmd += [
         f"/v:{cfg.rdp.ip}:{cfg.rdp.port}",
         f"/u:{cfg.rdp.user}",
-        f"/p:{password}",
         "/cert:tofu",
         "/sec:tls",
         # 通过 PowerShell 执行 install.bat
@@ -101,11 +100,19 @@ def auto_install_agent(cfg: Config) -> bool:
     log.info("执行: flatpak run ... /app:program:powershell.exe ...")
 
     try:
-        # 启动 agent（不等待完成）
+        # 启动 agent（密码通过环境变量传递）
+        import os
+        env = os.environ.copy()
+        if password:
+            env["FREERDP_PASSWORD"] = password
+            cmd.append(f"/p:{password}")
+
+        # 启动进程
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            env=env,
         )
 
         # 等待 agent 启动
@@ -118,6 +125,13 @@ def auto_install_agent(cfg: Config) -> bool:
             time.sleep(2)
 
         log.warning("Agent 启动超时")
+        # 清理进程
+        if proc.poll() is None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.kill()
         return False
 
     except Exception as e:

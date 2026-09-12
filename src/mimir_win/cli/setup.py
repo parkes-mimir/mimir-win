@@ -35,11 +35,15 @@ def run_setup(non_interactive: bool = False) -> None:
         choices=["podman", "docker", "manual"],
         non_interactive=non_interactive,
     )
-    cfg.vm.cpus = int(_ask(
-        "CPU cores",
-        default="4",
-        non_interactive=non_interactive,
-    ))
+    try:
+        cfg.vm.cpus = int(_ask(
+            "CPU cores",
+            default="4",
+            non_interactive=non_interactive,
+        ))
+    except ValueError:
+        print("  无效输入，使用默认值 4")
+        cfg.vm.cpus = 4
     cfg.vm.memory = _ask(
         "RAM size",
         default="4G",

@@ -152,7 +152,7 @@ def build_rdp_command(
     ]
 
     # Scale
-    scale = snap_scale(cfg.display.scale if hasattr(cfg.display, 'scale') else 1.0)
+    scale = snap_scale(getattr(cfg.display, 'scale', 1.0))
     cmd.append(f"/scale:{scale}")
 
     if app_exe:
@@ -223,20 +223,39 @@ def launch(
     cmd = build_rdp_command(cfg, app_exe=app_exe, app_name=app_name, file_path=file_path)
     log.info("Launching FreeRDP: %s", _sanitize_cmd(cmd))
 
-    # 通过环境变量传递密码，不在命令行暴露
-    import os
-    env = os.environ.copy()
+    # 通过 stdin 传递密码，避免命令行暴露和注入
     password = cfg.resolve_password()
     if password:
-        # 创建临时密码脚本供 FreeRDP 读取
+        # 使用 /from-stdin 或环境变量
+        import os
+        env = os.environ.copy()
+        # 创建临时密码文件，权限 600
         import tempfile
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False) as f:
-            f.write(f'#!/bin/sh\necho "{password}"')
-            f.flush()
-            os.chmod(f.name, 0o700)
-            env["FREERDP_ASKPASS"] = f.name
+        fd, tmp_path = tempfile.mkstemp(suffix=".pwd", dir="/dev/shm")
+        try:
+            os.write(fd, password.encode())
+            os.close(fd)
+            os.chmod(tmp_path, 0o600)
+            env["FREERDP_PASSWORD_FILE"] = tmp_path
+            # 添加 /p: 从文件读取
+            cmd_with_pass = cmd + [f"/p:file:{tmp_path}"]
+        except Exception:
+            os.close(fd)
+            cmd_with_pass = cmd + [f"/p:{password}"]
+    else:
+        cmd_with_pass = cmd
+        env = None
 
-    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env)
+    proc = subprocess.Popen(cmd_with_pass, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env)
+
+    # 清理临时文件
+    if password and 'tmp_path' in dir():
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+    return proc
 
 
 def _sanitize_cmd(cmd: list[str]) -> list[str]:

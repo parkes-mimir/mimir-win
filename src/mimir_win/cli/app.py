@@ -146,16 +146,6 @@ def _cmd_refresh(cfg: Config) -> None:
     print("桌面快捷方式已更新")
 
 
-def _cmd_run_manual(cfg: Config, exe: str, file_path: str | None = None) -> None:
-    """手动运行任意 Windows 可执行文件。"""
-    _ensure_ready(cfg)
-    name = Path(exe).stem
-    print(f"运行 {exe}...")
-    proc = rdp.launch(cfg, app_exe=exe, app_name=name, file_path=file_path)
-    if proc:
-        proc.wait()
-
-
 def _ensure_ready(cfg: Config) -> None:
     """确保 VM 运行且 FreeRDP 可用。"""
     from mimir_win.core.rdp import find_freerdp
@@ -198,7 +188,10 @@ def _find_app(cfg: Config, app_id: str) -> dict | None:
 
 def _make_id(name: str) -> str:
     """应用名 → 文件系统安全 ID。"""
-    return name.lower().replace(" ", "-").replace(".", "-").replace("(", "").replace(")", "")
+    import re
+    # 只保留字母数字和连字符，防止路径遍历
+    safe = re.sub(r'[^a-zA-Z0-9\-]', '-', name.lower())
+    return re.sub(r'-+', '-', safe).strip('-')
 
 
 def _apps_cache_path(cfg: Config) -> Path:
@@ -281,4 +274,3 @@ def _create_desktop_entries(cfg: Config, apps: list[dict]) -> None:
             icon_path=icon_path,
             mimir_win_bin=mimir_win_bin,
         )
-import re

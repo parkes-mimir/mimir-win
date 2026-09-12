@@ -32,9 +32,12 @@ def monitor_idle(cfg: Config) -> None:
         log.info("Idle monitoring disabled")
         return
 
-    # 注册信号处理
-    signal.signal(signal.SIGINT, _signal_handler)
-    signal.signal(signal.SIGTERM, _signal_handler)
+    # 注册信号处理（仅在主线程中）
+    try:
+        signal.signal(signal.SIGINT, _signal_handler)
+        signal.signal(signal.SIGTERM, _signal_handler)
+    except ValueError:
+        log.warning("无法注册信号处理（非主线程）")
 
     log.info("Idle monitor started (timeout=%ds, action=%s)",
              cfg.vm.idle_timeout, cfg.vm.idle_action)
@@ -59,6 +62,11 @@ def monitor_idle(cfg: Config) -> None:
 
         # Re-check after timeout
         if _has_active_sessions(cfg):
+            continue
+
+        # 重新检查 VM 状态，避免对已停止的 VM 执行暂停
+        state = vm.get_state(cfg)
+        if state != vm.VMState.RUNNING:
             continue
 
         _do_suspend(cfg)

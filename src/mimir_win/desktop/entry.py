@@ -96,13 +96,15 @@ def create_windows_entry(mimir_win_bin: str = "mimir-win") -> Path:
     """Create a .desktop entry for a full Windows desktop session."""
     _ensure_dirs()
     icon = _create_default_icon()
+    import os
+    project_dir = os.environ.get("MIMIR_WIN_PROJECT_DIR", os.getcwd())
 
     desktop = DESKTOP_DIR / "mimir-win-windows.desktop"
     desktop.write_text(
         f"""\
 [Desktop Entry]
 Name=Windows 桌面
-Exec=nix develop "/home/mimir/win project/mimir-win" --command python -m mimir_win windows %F
+Exec=nix develop "{project_dir}" --command python -m mimir_win windows %F
 Terminal=false
 Type=Application
 Categories=Mimir-Win;System;

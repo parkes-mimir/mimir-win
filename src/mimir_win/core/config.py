@@ -65,6 +65,7 @@ class VMConfig:
 class DisplayConfig:
     prefer_native_wayland: bool = True
     multimon: str = "none"  # none | multi | span
+    scale: float = 1.0  # DPI 缩放比例
 
 
 @dataclass
@@ -119,7 +120,7 @@ class Config:
         return cfg
 
     def save(self, path: Path | None = None) -> None:
-        """Save config to TOML file."""
+        """Save config to TOML file with restricted permissions."""
         path = path or config_dir() / "mimir-win.toml"
         path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -130,7 +131,7 @@ class Config:
         for k, v in self.rdp.__dict__.items():
             if k == "password" and v:
                 lines.append(f'{k} = "{v}"')
-            elif v != "":
+            elif k == "password_file" or v != "":
                 lines.append(f'{k} = {_toml_value(v)}')
         lines.append("")
 
@@ -148,6 +149,9 @@ class Config:
         lines.append("")
 
         path.write_text("\n".join(lines) + "\n")
+        # 限制文件权限，只有 owner 可读写
+        import stat as _stat
+        path.chmod(_stat.S_IRUSR | _stat.S_IWUSR)
 
     def resolve_password(self) -> str:
         """Resolve password from direct value or file."""

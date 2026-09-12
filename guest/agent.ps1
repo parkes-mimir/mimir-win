@@ -1,6 +1,22 @@
 param([int]$Port = 8765)
 $ErrorActionPreference = "Continue"
 
+# 自动注册开机启动（首次运行时）
+$regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$regName = "MimirWinAgent"
+$scriptPath = $MyInvocation.MyCommand.Path
+$regValue = "powershell -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`""
+
+try {
+    $existing = Get-ItemProperty -Path $regPath -Name $regName -ErrorAction SilentlyContinue
+    if (-not $existing -or $existing.$regName -ne $regValue) {
+        Set-ItemProperty -Path $regPath -Name $regName -Value $regValue -Force
+        Write-Host "Registered auto-start in registry"
+    }
+} catch {
+    Write-Host "Failed to register auto-start: $_"
+}
+
 function Get-AppIcon {
     param([string]$ExePath)
     try {

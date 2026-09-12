@@ -50,7 +50,11 @@ def _cmd_set(args: argparse.Namespace) -> None:
     # Type coercion
     current = getattr(target, field)
     if isinstance(current, int):
-        value = int(value)  # type: ignore[assignment]
+        try:
+            value = int(value)  # type: ignore[assignment]
+        except ValueError:
+            print(f"错误: '{value}' 不是有效的整数")
+            sys.exit(1)
     elif isinstance(current, bool):
         value = value.lower() in ("true", "1", "yes")  # type: ignore[assignment]
 

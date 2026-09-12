@@ -199,19 +199,19 @@ def stop(cfg: Config) -> None:
         return
     cmd = _compose_cmd(cfg) + ["--file", str(compose_path), "stop"]
     log.info("停止 VM: %s", " ".join(cmd))
-    subprocess.run(cmd, check=True, cwd=str(compose_path.parent))
+    subprocess.run(cmd, check=True, cwd=str(compose_path.parent), timeout=120)
 
 
 def pause(cfg: Config) -> None:
     """暂停容器（释放 CPU，保留内存）。"""
     cmd = _container_cmd(cfg) + ["pause", cfg.vm.container_name]
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True, timeout=30)
 
 
 def unpause(cfg: Config) -> None:
     """恢复暂停的容器。"""
     cmd = _container_cmd(cfg) + ["unpause", cfg.vm.container_name]
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True, timeout=30)
 
 
 def remove(cfg: Config) -> None:
@@ -219,7 +219,7 @@ def remove(cfg: Config) -> None:
     compose_path = Path(cfg.vm.data_dir) / "compose.yaml"
     if compose_path.exists():
         cmd = _compose_cmd(cfg) + ["--file", str(compose_path), "down"]
-        subprocess.run(cmd, check=False, cwd=str(compose_path.parent))
+        subprocess.run(cmd, check=False, cwd=str(compose_path.parent), timeout=120)
 
 
 # ============================================================
