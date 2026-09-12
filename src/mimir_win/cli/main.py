@@ -48,8 +48,7 @@ def cli(argv: list[str] | None = None) -> None:
 
     # setup
     p_setup = sub.add_parser("setup", help="交互式安装向导")
-    p_setup.add_argument("--non-interactive", action="store_true",
-                         help="非交互模式（使用默认值）")
+    p_setup.add_argument("--non-interactive", action="store_true", help="非交互模式（使用默认值）")
 
     # doctor
     sub.add_parser("doctor", help="检查系统依赖和配置")
@@ -105,19 +104,23 @@ def cli(argv: list[str] | None = None) -> None:
 
     if args.command == "setup":
         from mimir_win.cli.setup import run_setup
+
         run_setup(non_interactive=args.non_interactive)
 
     elif args.command == "doctor":
         from mimir_win.cli.doctor import run_doctor
+
         run_doctor()
 
     elif args.command == "windows":
         # 快捷方式：启动完整桌面，关闭后自动刷新应用列表
         from mimir_win.cli.app import _cmd_refresh, _ensure_ready
         from mimir_win.core.config import Config
+
         cfg = Config.load()
         _ensure_ready(cfg)
         from mimir_win.core import rdp
+
         print("启动 Windows 桌面...")
         proc = rdp.launch(cfg)
         if proc:
@@ -131,16 +134,20 @@ def cli(argv: list[str] | None = None) -> None:
 
     elif args.command == "vm":
         from mimir_win.cli.vm import handle_vm
+
         handle_vm(args)
 
     elif args.command == "app":
         from mimir_win.cli.app import handle_app
+
         handle_app(args)
 
     elif args.command == "run":
         from mimir_win.cli.app import handle_run
+
         handle_run(args)
 
     elif args.command == "config":
         from mimir_win.cli.config_cmd import handle_config
+
         handle_config(args)

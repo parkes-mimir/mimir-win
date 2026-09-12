@@ -100,6 +100,7 @@ def _cmd_refresh(cfg: Config) -> None:
 
     # 确保 agent 可用
     from mimir_win.core.provisioner import ensure_agent
+
     if not ensure_agent(cfg):
         print("Guest Agent 不可用。")
         print("可能原因：")
@@ -115,6 +116,7 @@ def _cmd_refresh(cfg: Config) -> None:
 
     print("正在查询 Guest Agent...")
     from mimir_win.guest.client import GuestClient
+
     client = GuestClient(port=cfg.rdp.port + 2)
 
     if not client.health():
@@ -130,8 +132,7 @@ def _cmd_refresh(cfg: Config) -> None:
 
     guest_apps = client.get_apps()
     apps = [
-        {"name": a.name, "path": a.path, "source": a.source, "icon": a.icon_b64}
-        for a in guest_apps
+        {"name": a.name, "path": a.path, "source": a.source, "icon": a.icon_b64} for a in guest_apps
     ]
 
     # 缓存
@@ -148,6 +149,7 @@ def _cmd_refresh(cfg: Config) -> None:
 def _ensure_ready(cfg: Config) -> None:
     """确保 VM 运行且 FreeRDP 可用。"""
     from mimir_win.core.rdp import find_freerdp
+
     freerdp = find_freerdp()
     if not freerdp:
         print("错误: 未找到 FreeRDP 3+", file=sys.stderr)
@@ -188,9 +190,10 @@ def _find_app(cfg: Config, app_id: str) -> dict | None:
 def _make_id(name: str) -> str:
     """应用名 → 文件系统安全 ID。"""
     import re
+
     # 只保留字母数字和连字符，防止路径遍历
-    safe = re.sub(r'[^a-zA-Z0-9\-]', '-', name.lower())
-    return re.sub(r'-+', '-', safe).strip('-')
+    safe = re.sub(r"[^a-zA-Z0-9\-]", "-", name.lower())
+    return re.sub(r"-+", "-", safe).strip("-")
 
 
 def _apps_cache_path(cfg: Config) -> Path:
@@ -216,32 +219,59 @@ def _create_desktop_entries(cfg: Config, apps: list[dict]) -> None:
     # 过滤系统组件（不是用户应用）
     _SKIP_PATTERNS = [
         # UWP 系统框架
-        "microsoft.windows", "microsoft.aad", "microsoft.accounts",
-        "microsoft.async", "microsoft.bio", "microsoft.cred",
-        "microsoft.ecapp", "microsoft.lock", "microsoft.win32",
-        "microsoft.xbox", "microsoft.zune",
-        "microsoft.sechealth", "microsoft.todos", "microsoft.raw",
-        "microsoft.vp9", "microsoft.web", "microsoft.power",
-        "microsoft.screen", "microsoft.yourphone",
-        "microsoft.phone", "microsoft.widgets", "microsoft.cbs",
-        "microsoft.client", "microsoft.oobe", "microsoft.photon",
-        "microsoft.undocked", "microsoft.crossdevice",
-        "microsoft.quickassist", "microsoft.xboxspeech",
-        "microsoft.xboxgaming", "microsoft.xboxtcui",
+        "microsoft.windows",
+        "microsoft.aad",
+        "microsoft.accounts",
+        "microsoft.async",
+        "microsoft.bio",
+        "microsoft.cred",
+        "microsoft.ecapp",
+        "microsoft.lock",
+        "microsoft.win32",
+        "microsoft.xbox",
+        "microsoft.zune",
+        "microsoft.sechealth",
+        "microsoft.todos",
+        "microsoft.raw",
+        "microsoft.vp9",
+        "microsoft.web",
+        "microsoft.power",
+        "microsoft.screen",
+        "microsoft.yourphone",
+        "microsoft.phone",
+        "microsoft.widgets",
+        "microsoft.cbs",
+        "microsoft.client",
+        "microsoft.oobe",
+        "microsoft.photon",
+        "microsoft.undocked",
+        "microsoft.crossdevice",
+        "microsoft.quickassist",
+        "microsoft.xboxspeech",
+        "microsoft.xboxgaming",
+        "microsoft.xboxtcui",
         "microsoft.windowspackagemanager",
         "microsoft.outlookinstaller",
         "microsoftterminal",
         # 系统工具（非用户应用）
-        "diagnostics utility", "licensemanager",
-        "touch keyboard", "windows contacts",
-        "gethelp", "skype", "winget", "store",
+        "diagnostics utility",
+        "licensemanager",
+        "touch keyboard",
+        "windows contacts",
+        "gethelp",
+        "skype",
+        "winget",
+        "store",
         "WindowsPackageManagerServer",
-        "microsoft.gethelp", "microsoft.skype",
+        "microsoft.gethelp",
+        "microsoft.skype",
         "microsoft.desktopappinstaller",
     ]
 
     # UUID 正则
-    _UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', re.IGNORECASE)
+    _UUID_RE = re.compile(
+        r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE
+    )
 
     # 每个应用
     for app in apps:
@@ -265,6 +295,7 @@ def _create_desktop_entries(cfg: Config, apps: list[dict]) -> None:
         icon_b64 = app.get("icon", "")
         if icon_b64:
             from mimir_win.desktop.icons import save_icon
+
             try:
                 icon_path = str(save_icon(app_id, icon_b64))
             except (OSError, ValueError, KeyError):

@@ -94,7 +94,7 @@ def auto_install_agent(cfg: Config) -> bool:
         "/cert:tofu",
         "/sec:tls",
         # 通过 PowerShell 执行 install.bat
-        '/app:program:powershell.exe,args:-ExecutionPolicy Bypass -File C:\\OEM\\agent.ps1,name:agent',
+        "/app:program:powershell.exe,args:-ExecutionPolicy Bypass -File C:\\OEM\\agent.ps1,name:agent",
     ]
 
     log.info("执行: flatpak run ... /app:program:powershell.exe ...")
@@ -102,6 +102,7 @@ def auto_install_agent(cfg: Config) -> bool:
     try:
         # 启动 agent（密码通过环境变量传递）
         import os
+
         env = os.environ.copy()
         if password:
             env["FREERDP_PASSWORD"] = password
@@ -142,6 +143,7 @@ def auto_install_agent(cfg: Config) -> bool:
 def _check_agent_port(cfg: Config) -> bool:
     """检查 agent 是否正常响应。"""
     from mimir_win.guest.client import GuestClient
+
     client = GuestClient(port=cfg.rdp.port + 2)
     return client.health()
 

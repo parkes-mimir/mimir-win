@@ -19,6 +19,7 @@ else:
 
 # --- XDG paths ---
 
+
 def config_dir() -> Path:
     return Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "mimir-win"
 
@@ -32,6 +33,7 @@ def cache_dir() -> Path:
 
 
 # --- Data classes ---
+
 
 @dataclass
 class RDPConfig:
@@ -132,25 +134,26 @@ class Config:
             if k == "password" and v:
                 lines.append(f'{k} = "{v}"')
             elif k == "password_file" or v != "":
-                lines.append(f'{k} = {_toml_value(v)}')
+                lines.append(f"{k} = {_toml_value(v)}")
         lines.append("")
 
         # VM section
         lines.append("[vm]")
         for k, v in self.vm.__dict__.items():
             if v != "" and v is not False:
-                lines.append(f'{k} = {_toml_value(v)}')
+                lines.append(f"{k} = {_toml_value(v)}")
         lines.append("")
 
         # Display section
         lines.append("[display]")
         for k, v in self.display.__dict__.items():
-            lines.append(f'{k} = {_toml_value(v)}')
+            lines.append(f"{k} = {_toml_value(v)}")
         lines.append("")
 
         path.write_text("\n".join(lines) + "\n")
         # 限制文件权限，只有 owner 可读写
         import stat as _stat
+
         path.chmod(_stat.S_IRUSR | _stat.S_IWUSR)
 
     def resolve_password(self) -> str:

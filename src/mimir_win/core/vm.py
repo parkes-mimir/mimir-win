@@ -37,7 +37,7 @@ class VMState(str, Enum):
 # Compose 模板 - 完整配置，开箱即用
 # ============================================================
 
-COMPOSE_TEMPLATE = '''\
+COMPOSE_TEMPLATE = """\
 name: "mimir-win"
 services:
   windows:
@@ -68,7 +68,7 @@ services:
       - {data_dir}:/storage
       - {home_share}:/shared
       - {oem_dir}:/oem
-'''
+"""
 
 
 def generate_compose(cfg: Config) -> str:
@@ -77,14 +77,26 @@ def generate_compose(cfg: Config) -> str:
 
     # 检测代理设置
     proxy_lines = []
-    for key in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy", "ALL_PROXY", "all_proxy", "NO_PROXY", "no_proxy"):
+    for key in (
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "http_proxy",
+        "https_proxy",
+        "ALL_PROXY",
+        "all_proxy",
+        "NO_PROXY",
+        "no_proxy",
+    ):
         val = os.environ.get(key, "")
         if val:
             # 将 127.0.0.1 替换为宿主机 IP
             if "127.0.0.1" in val:
                 import subprocess
+
                 try:
-                    out = subprocess.check_output(["ip", "route", "get", "1"], text=True, stderr=subprocess.DEVNULL)
+                    out = subprocess.check_output(
+                        ["ip", "route", "get", "1"], text=True, stderr=subprocess.DEVNULL
+                    )
                     parts = out.split()
                     for i, part in enumerate(parts):
                         if part == "via" and i + 1 < len(parts):
@@ -125,6 +137,7 @@ def write_compose(cfg: Config) -> Path:
 # ============================================================
 # 容器后端抽象
 # ============================================================
+
 
 def _compose_cmd(cfg: Config) -> list[str]:
     if cfg.vm.backend == "podman":
@@ -175,6 +188,7 @@ def _container_cmd(cfg: Config) -> list[str]:
 # 生命周期
 # ============================================================
 
+
 def start(cfg: Config) -> None:
     """启动 Windows VM。密码通过环境变量传递，不落盘。"""
     compose_path = write_compose(cfg)
@@ -183,6 +197,7 @@ def start(cfg: Config) -> None:
 
     # 通过环境变量传递密码，不写入 compose.yaml
     import os
+
     env = os.environ.copy()
     env["PASSWORD"] = cfg.resolve_password()
 
@@ -224,11 +239,15 @@ def remove(cfg: Config) -> None:
 # 状态查询
 # ============================================================
 
+
 def get_state(cfg: Config) -> VMState:
     """查询容器当前状态。"""
     try:
         cmd = _container_cmd(cfg) + [
-            "inspect", "--format", "{{.State.Status}}", cfg.vm.container_name
+            "inspect",
+            "--format",
+            "{{.State.Status}}",
+            cfg.vm.container_name,
         ]
         out = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL).strip()
         mapping = {

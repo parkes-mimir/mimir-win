@@ -83,6 +83,7 @@ def _check_backend() -> tuple[bool, str, str]:
 
 def _check_freerdp() -> tuple[bool, str, str]:
     from mimir_win.core.rdp import find_freerdp
+
     info = find_freerdp()
     if info:
         return True, f"{info.path} (v{info.version_major}+)", ""
@@ -101,6 +102,7 @@ def _check_freerdp() -> tuple[bool, str, str]:
 def _check_config() -> tuple[bool, str, str]:
     # 检查环境变量（NixOS）
     import os
+
     env_path = os.environ.get("MIMIR_WIN_CONFIG")
     if env_path:
         p = Path(env_path)
@@ -132,6 +134,7 @@ def _check_config() -> tuple[bool, str, str]:
 
 def _check_display() -> tuple[bool, str, str]:
     from mimir_win.core.display import detect
+
     d = detect()
     wayland_note = ""
     if d.session_type == "wayland":
@@ -147,7 +150,8 @@ def _check_compose() -> tuple[bool, str, str]:
                 try:
                     subprocess.check_output(
                         ["docker", "compose", "version"],
-                        text=True, stderr=subprocess.DEVNULL,
+                        text=True,
+                        stderr=subprocess.DEVNULL,
                     )
                     return True, "docker compose 可用", ""
                 except (subprocess.CalledProcessError, FileNotFoundError):
@@ -157,8 +161,5 @@ def _check_compose() -> tuple[bool, str, str]:
     return (
         False,
         "未找到 compose 工具",
-        (
-            "NixOS: 确保 virtualisation.podman.enable = true\n"
-            "       或安装 docker-compose"
-        ),
+        ("NixOS: 确保 virtualisation.podman.enable = true\n       或安装 docker-compose"),
     )

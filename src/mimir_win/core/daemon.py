@@ -38,8 +38,9 @@ def monitor_idle(cfg: Config) -> None:
     except ValueError:
         log.warning("无法注册信号处理（非主线程）")
 
-    log.info("Idle monitor started (timeout=%ds, action=%s)",
-             cfg.vm.idle_timeout, cfg.vm.idle_action)
+    log.info(
+        "Idle monitor started (timeout=%ds, action=%s)", cfg.vm.idle_timeout, cfg.vm.idle_action
+    )
 
     while not _stop_event.is_set():
         # 等待 30 秒，但支持提前退出
@@ -80,7 +81,8 @@ def _has_active_sessions(cfg: Config) -> bool:
     try:
         out = subprocess.check_output(
             ["pgrep", "-f", "xfreerdp|sdl-freerdp"],
-            text=True, stderr=subprocess.DEVNULL,
+            text=True,
+            stderr=subprocess.DEVNULL,
         )
         return bool(out.strip())
     except (subprocess.CalledProcessError, FileNotFoundError):

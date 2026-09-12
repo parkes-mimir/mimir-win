@@ -26,13 +26,13 @@ def _create_default_icon() -> Path:
         return icon_path
 
     # 简单的 Windows logo SVG
-    svg = '''<?xml version="1.0" encoding="UTF-8"?>
+    svg = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
   <rect x="2" y="2" width="20" height="20" fill="#0078d4" rx="2"/>
   <rect x="26" y="2" width="20" height="20" fill="#0078d4" rx="2"/>
   <rect x="2" y="26" width="20" height="20" fill="#0078d4" rx="2"/>
   <rect x="26" y="26" width="20" height="20" fill="#0078d4" rx="2"/>
-</svg>'''
+</svg>"""
     icon_path.write_text(svg)
     return icon_path
 
@@ -136,7 +136,9 @@ def create_menu_directory() -> Path:
 """)
 
     # 创建 .directory 文件（菜单分类定义）
-    directory_file = Path.home() / ".local" / "share" / "desktop-directories" / "mimir-win.directory"
+    directory_file = (
+        Path.home() / ".local" / "share" / "desktop-directories" / "mimir-win.directory"
+    )
     directory_file.parent.mkdir(parents=True, exist_ok=True)
     icon = _create_default_icon()
     directory_file.write_text(f"""\

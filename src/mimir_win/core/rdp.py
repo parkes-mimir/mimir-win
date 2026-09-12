@@ -15,16 +15,32 @@ from mimir_win.core.display import snap_scale
 log = logging.getLogger(__name__)
 
 # Safe FreeRDP flags that users can pass through
-_BARE_FLAGS: frozenset[str] = frozenset({
-    "+fonts", "-fonts", "+aero", "-aero", "+wallpaper", "-wallpaper",
-    "+grab-keyboard", "-grab-keyboard", "+gfx", "-gfx",
-    "+auto-reconnect", "-auto-reconnect",
-    "+home-drive", "-home-drive",
-    "+clipboard", "-clipboard",
-    "+multimon", "-multimon",
-    "+span", "-span",
-    "+decorations", "-decorations",
-})
+_BARE_FLAGS: frozenset[str] = frozenset(
+    {
+        "+fonts",
+        "-fonts",
+        "+aero",
+        "-aero",
+        "+wallpaper",
+        "-wallpaper",
+        "+grab-keyboard",
+        "-grab-keyboard",
+        "+gfx",
+        "-gfx",
+        "+auto-reconnect",
+        "-auto-reconnect",
+        "+home-drive",
+        "-home-drive",
+        "+clipboard",
+        "-clipboard",
+        "+multimon",
+        "-multimon",
+        "+span",
+        "-span",
+        "+decorations",
+        "-decorations",
+    }
+)
 _SIMPLE_VALUE_FLAGS: dict[str, re.Pattern[str]] = {
     "/scale": re.compile(r"[1-9][0-9]{0,3}$"),
     "/sound": re.compile(r"[a-zA-Z0-9_:-]{1,64}$"),
@@ -49,7 +65,8 @@ def find_freerdp() -> FreeRDPInfo | None:
         try:
             out = subprocess.check_output(
                 ["flatpak", "run", "--command=xfreerdp", "com.freerdp.FreeRDP", "--version"],
-                text=True, stderr=subprocess.DEVNULL,
+                text=True,
+                stderr=subprocess.DEVNULL,
             )
             major = _parse_major_version(out)
             if major >= 3:
@@ -85,9 +102,7 @@ def _probe(cmd: str, kind: str) -> FreeRDPInfo | None:
     if not path:
         return None
     try:
-        out = subprocess.check_output(
-            [path, "--version"], text=True, stderr=subprocess.STDOUT
-        )
+        out = subprocess.check_output([path, "--version"], text=True, stderr=subprocess.STDOUT)
         major = _parse_major_version(out)
         if major >= 3:
             return FreeRDPInfo(path=path, kind=kind, version_major=major)
@@ -105,6 +120,7 @@ def _parse_major_version(output: str) -> int:
 
 
 # --- Command building ---
+
 
 def build_rdp_command(
     cfg: Config,
@@ -149,16 +165,16 @@ def build_rdp_command(
     ]
 
     # Scale
-    scale = snap_scale(getattr(cfg.display, 'scale', 1.0))
+    scale = snap_scale(getattr(cfg.display, "scale", 1.0))
     cmd.append(f"/scale:{scale}")
 
     if app_exe:
         # RemoteApp mode - seamless individual window
         name = app_name or Path(app_exe).stem
-        app_arg = f'/app:program:{app_exe},name:{name}'
+        app_arg = f"/app:program:{app_exe},name:{name}"
         if file_path:
             unc = _linux_to_unc(file_path)
-            app_arg += f',cmd:{unc}'
+            app_arg += f",cmd:{unc}"
         cmd.append(app_arg)
 
         # Extra user flags
@@ -210,6 +226,7 @@ def _parse_extra_flags(flags_str: str) -> list[str]:
 
 # --- Session management ---
 
+
 def launch(
     cfg: Config,
     app_exe: str | None = None,
@@ -225,10 +242,12 @@ def launch(
     if password:
         # 使用 /from-stdin 或环境变量
         import os
+
         env = os.environ.copy()
         # 创建临时密码文件，权限 600
         import tempfile
-        fd, tmp_path = tempfile.mkstemp(suffix=".pwd", dir="/dev/shm")
+
+        fd, tmp_path = tempfile.mkstemp(suffix=".pwd")  # nosec B108 - 使用系统默认临时目录
         try:
             os.write(fd, password.encode())
             os.close(fd)
@@ -243,10 +262,12 @@ def launch(
         cmd_with_pass = cmd
         env = None
 
-    proc = subprocess.Popen(cmd_with_pass, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env)
+    proc = subprocess.Popen(
+        cmd_with_pass, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env
+    )
 
     # 清理临时文件
-    if password and 'tmp_path' in dir():
+    if password and "tmp_path" in dir():
         try:
             os.unlink(tmp_path)
         except OSError:

@@ -105,11 +105,13 @@ def snap_scale(scale: float) -> int:
 
 # --- Private helpers ---
 
+
 def _gnome_scale() -> float:
     try:
         out = subprocess.check_output(
             ["gsettings", "get", "org.gnome.desktop.interface", "scaling-factor"],
-            text=True, stderr=subprocess.DEVNULL,
+            text=True,
+            stderr=subprocess.DEVNULL,
         )
         scale = int(out.strip().split()[-1])
         if scale > 0:
@@ -124,7 +126,8 @@ def _kde_scale() -> float:
         try:
             out = subprocess.check_output(
                 [cmd, "--group", "KScreen", "--key", "ScaleFactor"],
-                text=True, stderr=subprocess.DEVNULL,
+                text=True,
+                stderr=subprocess.DEVNULL,
             )
             scale = float(out.strip())
             if scale > 0:
@@ -139,9 +142,11 @@ def _wayland_compositor_scale(compositor: str) -> float:
         try:
             out = subprocess.check_output(
                 ["swaymsg", "-t", "get_outputs", "-r"],
-                text=True, stderr=subprocess.DEVNULL,
+                text=True,
+                stderr=subprocess.DEVNULL,
             )
             import json
+
             outputs = json.loads(out)
             for o in outputs:
                 if o.get("focused"):
@@ -152,9 +157,11 @@ def _wayland_compositor_scale(compositor: str) -> float:
         try:
             out = subprocess.check_output(
                 ["hyprctl", "monitors", "-j"],
-                text=True, stderr=subprocess.DEVNULL,
+                text=True,
+                stderr=subprocess.DEVNULL,
             )
             import json
+
             monitors = json.loads(out)
             for m in monitors:
                 if m.get("focused"):
@@ -168,7 +175,8 @@ def _cinnamon_scale() -> float:
     try:
         out = subprocess.check_output(
             ["gsettings", "get", "org.cinnamon.desktop.interface", "scaling-factor"],
-            text=True, stderr=subprocess.DEVNULL,
+            text=True,
+            stderr=subprocess.DEVNULL,
         )
         scale = int(out.strip().split()[-1])
         if scale > 0:

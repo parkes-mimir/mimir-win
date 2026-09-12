@@ -41,7 +41,7 @@ class GuestClient:
         """Check if the guest agent is reachable."""
         try:
             req = urllib.request.Request(f"{self.base_url}/health")
-            with urllib.request.urlopen(req, timeout=2) as resp:
+            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - 仅允许 http
                 return resp.status == 200
         except (urllib.error.URLError, OSError, json.JSONDecodeError):
             return False
@@ -63,7 +63,7 @@ class GuestClient:
         if self.token:
             req.add_header("Authorization", f"Bearer {self.token}")
         try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
+            with urllib.request.urlopen(req, timeout=10) as resp:  # nosec B310 - 仅允许 http
                 return json.loads(resp.read())
         except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             log.warning("Guest agent request failed: %s", e)
@@ -72,9 +72,21 @@ class GuestClient:
     def _post(self, path: str, data: dict[str, Any] | None = None) -> Any:
         """Make an authenticated POST request."""
         body = json.dumps(data or {}).encode()
-        req = urllib.request.Request(
-            f"{self.base_url}{path}", data=body, method="POST"
-        )
+        req = urllib.request.Request(f"{self.base_url}{path}", data=body, method="POST")
+        req.add_header("Content-Type", "application/json")
+        if self.token:
+            req.add_header("Authorization", f"Bearer {self.token}")
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310 - 仅允许 http
+                return json.loads(resp.read())
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
+            log.warning("Guest agent POST failed: %s", e)
+            return {}
+
+    def _post(self, path: str, data: dict[str, Any] | None = None) -> Any:
+        """Make an authenticated POST request."""
+        body = json.dumps(data or {}).encode()
+        req = urllib.request.Request(f"{self.base_url}{path}", data=body, method="POST")
         req.add_header("Content-Type", "application/json")
         if self.token:
             req.add_header("Authorization", f"Bearer {self.token}")

@@ -35,11 +35,13 @@ def run_setup(non_interactive: bool = False) -> None:
         non_interactive=non_interactive,
     )
     try:
-        cfg.vm.cpus = int(_ask(
-            "CPU cores",
-            default="4",
-            non_interactive=non_interactive,
-        ))
+        cfg.vm.cpus = int(
+            _ask(
+                "CPU cores",
+                default="4",
+                non_interactive=non_interactive,
+            )
+        )
     except ValueError:
         print("  无效输入，使用默认值 4")
         cfg.vm.cpus = 4
@@ -76,24 +78,31 @@ def run_setup(non_interactive: bool = False) -> None:
         non_interactive=non_interactive,
         secret=True,
     )
-    cfg.rdp.port = int(_ask(
-        "RDP port",
-        default="3389",
-        non_interactive=non_interactive,
-    ))
+    cfg.rdp.port = int(
+        _ask(
+            "RDP port",
+            default="3389",
+            non_interactive=non_interactive,
+        )
+    )
 
     # --- Display ---
     print("\n--- Display ---\n")
 
     from mimir_win.core.display import detect
-    disp = detect()
-    print(f"  Detected: {disp.session_type}, {disp.desktop}, {disp.scale}x scale, {disp.monitors} monitor(s)")
 
-    cfg.vm.idle_timeout = int(_ask(
-        "Idle timeout (seconds, 0=disabled)",
-        default="300",
-        non_interactive=non_interactive,
-    ))
+    disp = detect()
+    print(
+        f"  Detected: {disp.session_type}, {disp.desktop}, {disp.scale}x scale, {disp.monitors} monitor(s)"
+    )
+
+    cfg.vm.idle_timeout = int(
+        _ask(
+            "Idle timeout (seconds, 0=disabled)",
+            default="300",
+            non_interactive=non_interactive,
+        )
+    )
 
     # --- Save ---
     print("\n--- Saving ---\n")
@@ -102,6 +111,7 @@ def run_setup(non_interactive: bool = False) -> None:
 
     # --- Prepare OEM assets ---
     from mimir_win.core.provisioner import prepare_oem_assets
+
     prepare_oem_assets()
     print("OEM assets prepared")
 
@@ -139,6 +149,7 @@ def _ask(
     while True:
         if secret:
             import getpass
+
             value = getpass.getpass(f"  {prompt}{hint}: ").strip()
         else:
             value = input(f"  {prompt}{hint}: ").strip()
